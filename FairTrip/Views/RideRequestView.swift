@@ -10,7 +10,7 @@ import SwiftUI
 struct RideRequestView: View {
     @ObservedObject var viewModel: RideViewModel
     @State private var selectedDriver: Driver?
-    @State private var showPaymentView = false
+    @State private var showSuccessMessage: Bool = false // State for success message
 
     var body: some View {
         VStack {
@@ -40,7 +40,7 @@ struct RideRequestView: View {
 
             // Pay Now button to navigate to payment
             Button(action: {
-                showPaymentView = true
+                confirmPayment()
             }) {
                 Text("Pay Now \(viewModel.fare, specifier: "%.2f")")
                     .frame(maxWidth: .infinity)
@@ -51,8 +51,12 @@ struct RideRequestView: View {
             }
             .padding()
             .disabled(selectedDriver == nil) // Disable if no driver is selected
-            .sheet(isPresented: $showPaymentView) {
-                PaymentView(viewModel: viewModel, selectedDriver: selectedDriver) // Pass selected driver to payment view
+            
+            // Show success message
+            if showSuccessMessage {
+                Text("Payment successful! Redirecting...")
+                    .foregroundColor(.green)
+                    .padding()
             }
         }
         .padding()
@@ -61,12 +65,39 @@ struct RideRequestView: View {
             viewModel.fetchAvailableDrivers() // Fetch drivers when the view appears
         }
     }
+
+    private func confirmPayment() {
+        // Assuming the ride data is already set in the ViewModel
+        let ride = Ride(
+            id: UUID().uuidString,
+            userId: "user_id_example", // Replace with actual user ID
+            pickupLocation: viewModel.pickupLocation!,
+            dropoffLocation: viewModel.dropoffLocation!,
+            timestamp: Date(),
+            fare: viewModel.fare,
+            driverId: selectedDriver?.id ?? "driver_id_example" // Replace with actual driver ID
+        )
+        
+        // Save the ride to Firebase
+        viewModel.saveRide(ride) { success in
+            if success {
+                // Show success message
+                showSuccessMessage = true
+                
+                // Navigate back to home screen after a delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    // Dismiss to go back to home view
+                    // Assuming you have a way to navigate back to the home screen
+                    // Replace with your actual navigation logic
+                    if let navigationController = UIApplication.shared.windows.first?.rootViewController as? UINavigationController {
+                        navigationController.popToRootViewController(animated: true)
+                    }
+                }
+            } else {
+                // Handle error (show alert, etc.)
+                print("Error saving ride to Firebase.")
+                showSuccessMessage = false // Optionally hide success message on error
+            }
+        }
+    }
 }
-
-
-
-
-
-//#Preview {
-//    RideRequestView(viewModel: RideViewModel(rideService: RideService(), authService: AuthService()), pickupLocation: "Location A", dropoffLocation: "Location B", timestamp: Date())
-//}

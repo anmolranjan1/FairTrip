@@ -1,10 +1,11 @@
 import SwiftUI
 
+import SwiftUI
+
 struct LoginView: View {
     @StateObject private var viewModel: LoginViewModel // Declare it as a StateObject
     @Binding var isLoggedIn: Bool
 
-    // Initialize with AuthService and the binding
     init(isLoggedIn: Binding<Bool>, authService: AuthService) {
         self._isLoggedIn = isLoggedIn
         self._viewModel = StateObject(wrappedValue: LoginViewModel(authService: authService, isLoggedIn: isLoggedIn))
@@ -16,7 +17,7 @@ struct LoginView: View {
                 Text("Welcome Back")
                     .font(.largeTitle)
                     .padding()
-                    .foregroundColor(.textColor) // Use the custom text color
+                    .foregroundColor(.textColor)
 
                 TextField("Email", text: $viewModel.email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -28,11 +29,11 @@ struct LoginView: View {
                     .padding()
                     .autocapitalization(.none)
 
-//                if let errorMessage = viewModel.errorMessage {
-//                    Text(errorMessage)
-//                        .foregroundColor(.red)
-//                        .padding()
-//                }
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                }
                 
                 Spacer()
 
@@ -42,27 +43,26 @@ struct LoginView: View {
                     Text("Log In")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.primaryColor) // Use the custom primary color
-                        .foregroundColor(.backgroundColor) // Use the custom background color
+                        .background(Color.primaryColor)
+                        .foregroundColor(.backgroundColor)
                         .cornerRadius(10)
                 }
                 .padding()
 
                 NavigationLink(destination: SignUpView(isSignedUp: .constant(false), authService: viewModel.getAuthService())) {
                     Text("Don't have an account? Sign Up")
-                        .foregroundColor(.accentColor) // Use the custom accent color
+                        .foregroundColor(.accentColor)
                 }
                 .padding()
 
-                NavigationLink(destination: HomeView()) {
+                NavigationLink(destination: HomeView(), isActive: $viewModel.isLoggedIn) {
                     EmptyView()
                 }
 
                 Spacer()
             }
             .padding()
-//            .navigationTitle("Login")
-            .background(Color.backgroundColor) // Set the background color
+            .background(Color.backgroundColor)
         }
         .navigationBarBackButtonHidden(true)
     }
@@ -73,10 +73,9 @@ struct LoginView_Previews: PreviewProvider {
     @State static var isLoggedIn = false
 
     static var previews: some View {
-        // Provide a mock AuthService instance
         LoginView(isLoggedIn: $isLoggedIn, authService: AuthService())
-            .preferredColorScheme(.light) // Preview in light mode
+            .preferredColorScheme(.light)
         LoginView(isLoggedIn: $isLoggedIn, authService: AuthService())
-            .preferredColorScheme(.dark) // Preview in dark mode
+            .preferredColorScheme(.dark)
     }
 }

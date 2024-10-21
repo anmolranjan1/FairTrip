@@ -12,16 +12,17 @@ class LoginViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var errorMessage: String?
+    @Published var isLoggedIn: Bool = false // Add this property
     
     private var cancellables = Set<AnyCancellable>()
     private let authService: AuthService
-    private var isLoggedIn: Binding<Bool> // Add a Binding for isLoggedIn
-    
+    private var isLoggedInBinding: Binding<Bool> // Change the name for clarity
+
     init(authService: AuthService, isLoggedIn: Binding<Bool>) {
         self.authService = authService
-        self.isLoggedIn = isLoggedIn // Set the Binding
+        self.isLoggedInBinding = isLoggedIn
     }
-    
+
     // Perform login action
     func login() {
         guard !email.isEmpty, !password.isEmpty else {
@@ -39,13 +40,13 @@ class LoginViewModel: ObservableObject {
                     self.errorMessage = error.localizedDescription
                 }
             }, receiveValue: { user in
-                self.isLoggedIn.wrappedValue = true // Update isLoggedIn state
+                self.isLoggedInBinding.wrappedValue = true // Update isLoggedIn state
                 self.authService.user = user // Set the logged-in user
+                self.isLoggedIn = true // Trigger navigation
             })
             .store(in: &cancellables)
     }
-    
-    // Public method to get authService
+
     func getAuthService() -> AuthService {
         return authService
     }

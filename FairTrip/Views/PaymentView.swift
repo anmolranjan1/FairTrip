@@ -11,6 +11,9 @@ struct PaymentView: View {
     @ObservedObject var viewModel: RideViewModel
     var selectedDriver: Driver?
     @Environment(\.presentationMode) var presentationMode // For dismissing the view
+    
+    @State private var showSuccessMessage: Bool = false // State for success message
+    @State private var successMessage: String = "" // Store the success message
 
     var body: some View {
         VStack {
@@ -46,13 +49,18 @@ struct PaymentView: View {
                     .cornerRadius(10)
             }
             .padding()
+
+            // Show success message
+            if showSuccessMessage {
+                Text(successMessage)
+                    .foregroundColor(.green)
+                    .padding()
+            }
         }
         .padding()
     }
 
     private func confirmPayment() {
-        // Here you should handle the payment processing
-        
         // Assuming the ride data is already set in the ViewModel
         let ride = Ride(
             id: UUID().uuidString,
@@ -67,15 +75,20 @@ struct PaymentView: View {
         // Save the ride to Firebase
         viewModel.saveRide(ride) { success in
             if success {
-                // Navigate back to home screen
-                presentationMode.wrappedValue.dismiss()
+                // Show success message
+                successMessage = "Payment successful! Go back!"
+                showSuccessMessage = true
+                
+                // Navigate back to home screen after a delay
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    presentationMode.wrappedValue.dismiss()
+                }
             } else {
                 // Handle error (show alert, etc.)
                 print("Error saving ride to Firebase.")
+                successMessage = "Error processing payment. Please try again."
+                showSuccessMessage = true
             }
         }
     }
 }
-
-
-
