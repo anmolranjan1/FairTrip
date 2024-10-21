@@ -1,19 +1,12 @@
-//
-//  RideHistoryView.swift
-//  FairTrip
-//
-//  Created by Anmol Ranjan on 20/10/24.
-//
-
 import SwiftUI
 
 struct RideHistoryView: View {
-    @StateObject private var viewModel: RideViewModel
+    @StateObject private var viewModel: RideHistoryViewModel
     var userId: String // Assume userId is passed to this view
 
     init(userId: String, rideService: RideService, authService: AuthService) {
         self.userId = userId
-        self._viewModel = StateObject(wrappedValue: RideViewModel(rideService: rideService, authService: authService))
+        self._viewModel = StateObject(wrappedValue: RideHistoryViewModel(rideService: rideService, authService: authService))
     }
 
     var body: some View {
@@ -31,12 +24,12 @@ struct RideHistoryView: View {
                 }
 
                 // Display ride history manually using VStack
-                ForEach(viewModel.rideHistory, id: \.id) { rideHistory in
+                ForEach(viewModel.rideHistories, id: \.id) { rideHistory in
                     VStack(alignment: .leading) {
                         Text("Pickup: \(rideHistory.pickupLocation.latitude), \(rideHistory.pickupLocation.longitude)")
                         Text("Dropoff: \(rideHistory.dropoffLocation.latitude), \(rideHistory.dropoffLocation.longitude)")
                         Text("Fare: \(rideHistory.fare, specifier: "%.2f")")
-                        Text("Driver: \(rideHistory.driver?.name ?? "Unknown")") // Assuming Driver has a 'name' property
+                        Text("Driver: \(rideHistory.driver?.name ?? "Unknown")")
                         Text("Timestamp: \(rideHistory.timestamp, formatter: dateFormatter)")
                             .padding(.bottom)
 
@@ -49,7 +42,8 @@ struct RideHistoryView: View {
             }
             .padding()
             .onAppear {
-                viewModel.fetchRideHistory() // Fetch rides on appear
+                // Fetch rides every time the view appears
+                viewModel.refreshRideHistory(for: userId)
             }
         }
         .navigationTitle("Ride History")

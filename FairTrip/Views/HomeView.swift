@@ -13,7 +13,7 @@ struct HomeView: View {
     private let authService = AuthService()
     
     @StateObject private var viewModel = RideViewModel(rideService: RideService(), authService: AuthService())
-    @StateObject private var rideHistoryViewModel = RideHistoryViewModel()
+//    @StateObject private var rideHistoryViewModel = RideHistoryViewModel()
     @State private var showRideHistory = false
     @State private var showProfile = false
     @State private var pickupLocation: String = ""

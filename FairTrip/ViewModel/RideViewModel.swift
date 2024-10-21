@@ -10,8 +10,16 @@ import Combine
 import CoreLocation
 
 class RideViewModel: ObservableObject {
-    @Published var pickupLocation: CLLocationCoordinate2D?
-    @Published var dropoffLocation: CLLocationCoordinate2D?
+    @Published var pickupLocation: CLLocationCoordinate2D? {
+           didSet {
+               calculateFare() // Recalculate fare when pickup changes
+           }
+       }
+    @Published var dropoffLocation: CLLocationCoordinate2D? {
+            didSet {
+                calculateFare() // Recalculate fare when dropoff changes
+            }
+        }
     @Published var rideHistory: [Ride] = []
     @Published var selectedDriver: Driver?
     @Published var fare: Double = 0.0

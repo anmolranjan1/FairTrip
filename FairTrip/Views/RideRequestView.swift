@@ -28,15 +28,20 @@ struct RideRequestView: View {
                 .background(selectedDriver?.id == driver.id ? Color.gray.opacity(0.2) : Color.clear) // Highlight selected driver
                 .onTapGesture {
                     selectedDriver = driver // Update selected driver
+                    viewModel.calculateFare() // Recalculate fare when selecting a driver
                 }
             }
+            
+            Text("Fare: \(viewModel.fare, specifier: "%.2f")")
+                            .font(.title2)
+                            .padding()
             
             if !showSuccessMessage {
                 // Pay Now button to navigate to payment
                 Button(action: {
                     confirmPayment()
                 }) {
-                    Text("Pay Now \(viewModel.fare, specifier: "%.2f")")
+                    Text("Pay Now")
                         .frame(maxWidth: .infinity)
                         .padding()
                         .background(Color.primaryColor)
@@ -47,19 +52,19 @@ struct RideRequestView: View {
                 .disabled(selectedDriver == nil) // Disable if no driver is selected
             } else {
                 Button(action: {
-//                    confirmPayment()
+                    // Payment confirmation or further action
                 }) {
-                    Text("Paid \(viewModel.fare, specifier: "%.2f")")
+                    Text("Paid")
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(Color.primaryColor)
+                        .background(Color.gray)
                         .foregroundColor(.white)
                         .cornerRadius(10)
                 }
                 .padding()
                 .disabled(selectedDriver == nil) // Disable if no driver is selected
             }
-            
+
             // Show success message
             if showSuccessMessage {
                 Text("Payment successful! Go back to homepage...")
@@ -71,6 +76,7 @@ struct RideRequestView: View {
         .navigationTitle("Ride Request")
         .onAppear {
             viewModel.fetchAvailableDrivers() // Fetch drivers when the view appears
+            viewModel.calculateFare() // Recalculate fare when the view appears
         }
     }
 

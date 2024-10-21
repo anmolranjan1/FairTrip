@@ -87,7 +87,13 @@ class ProfileViewModel: ObservableObject {
                     } else if let url = url {
                         self?.db.collection("users").document(userId).updateData([
                             "profilePictureURL": url.absoluteString
-                        ])
+                        ]) { error in
+                            if let error = error {
+                                print("Error updating profile picture URL: \(error)")
+                            } else {
+                                self?.fetchProfile() // Refresh the profile to update the UI
+                            }
+                        }
                     }
                 }
             }
