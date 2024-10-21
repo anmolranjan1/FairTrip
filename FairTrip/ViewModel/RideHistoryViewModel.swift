@@ -24,16 +24,18 @@ class RideHistoryViewModel: ObservableObject {
     
     // Function to fetch ride history for a specific user
     func fetchRideHistory(for userId: String) {
+        print("Fetching ride history for user: \(userId)") // Debugging line
         rideService.fetchRideHistory(for: userId)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 switch completion {
                 case .finished:
-                    break
+                    print("Fetch completed successfully") // Debugging line
                 case .failure(let error):
-                    print("Error fetching ride history: \(error.localizedDescription)")
+                    print("Error fetching ride history: \(error.localizedDescription)") // Debugging line
                 }
             }, receiveValue: { rideHistories in
+                print("Fetched ride histories: \(rideHistories)") // Debugging line
                 self.rideHistories = rideHistories
             })
             .store(in: &cancellables)
@@ -44,4 +46,5 @@ class RideHistoryViewModel: ObservableObject {
         fetchRideHistory(for: userId)
     }
 }
+
 

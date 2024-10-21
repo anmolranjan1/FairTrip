@@ -8,6 +8,13 @@
 import SwiftUI
 
 struct RideRequestView: View {
+    
+    //    @ObservedObject var viewModel: RideViewModel
+    //    var selectedDriver: Driver?
+    //    @Environment(\.presentationMode) var presentationMode // For dismissing the view
+    //
+    //    @State private var showSuccessMessage: Bool = false // State for success message
+    //    @State private var successMessage: String = "" // Store the success message
     @ObservedObject var viewModel: RideViewModel
     @State private var selectedDriver: Driver?
     @State private var showSuccessMessage: Bool = false // State for success message
@@ -67,7 +74,6 @@ struct RideRequestView: View {
     }
 
     private func confirmPayment() {
-        // Assuming the ride data is already set in the ViewModel
         let ride = Ride(
             id: UUID().uuidString,
             userId: "user_id_example", // Replace with actual user ID
@@ -81,23 +87,24 @@ struct RideRequestView: View {
         // Save the ride to Firebase
         viewModel.saveRide(ride) { success in
             if success {
+                // Fetch updated ride history after successful payment
+                self.viewModel.fetchRideHistory() // Update ride history
+                
                 // Show success message
                 showSuccessMessage = true
                 
                 // Navigate back to home screen after a delay
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     // Dismiss to go back to home view
-                    // Assuming you have a way to navigate back to the home screen
-                    // Replace with your actual navigation logic
                     if let navigationController = UIApplication.shared.windows.first?.rootViewController as? UINavigationController {
                         navigationController.popToRootViewController(animated: true)
                     }
                 }
             } else {
-                // Handle error (show alert, etc.)
                 print("Error saving ride to Firebase.")
                 showSuccessMessage = false // Optionally hide success message on error
             }
         }
     }
+
 }

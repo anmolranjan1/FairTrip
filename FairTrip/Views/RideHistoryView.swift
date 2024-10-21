@@ -9,7 +9,7 @@ import SwiftUI
 
 struct RideHistoryView: View {
     @ObservedObject var viewModel: RideHistoryViewModel
-    @State var userId: String // Assume userId is passed to this view
+    var userId: String // Assume userId is passed to this view
 
     var body: some View {
         Text("Ride Details")
@@ -19,14 +19,15 @@ struct RideHistoryView: View {
             VStack(alignment: .leading) {
                 Text("Pickup: \(rideHistory.pickupLocation.latitude), \(rideHistory.pickupLocation.longitude)")
                 Text("Dropoff: \(rideHistory.dropOffLocation.latitude), \(rideHistory.dropOffLocation.longitude)")
-                Text("Fare: \(rideHistory.fare)")
+                Text("Fare: \(rideHistory.fare, specifier: "%.2f")")
                 Text("Driver: \(rideHistory.driver.name)")
-                Text("Status: \(rideHistory.rideStatus.rawValue)")
+                Text("Status: \(rideHistory.rideStatus.rawValue.capitalized)")
                 Text("Timestamp: \(viewModel.dateFormatter.string(from: rideHistory.timestamp))")
             }
         }
         .onAppear {
-            viewModel.refreshRideHistory(for: userId)
+            print("RideHistoryView appeared. Fetching ride history for user: \(userId)") // Debugging line
+            viewModel.refreshRideHistory(for: userId) // Refresh ride history when the view appears
         }
         .navigationTitle("Ride History")
     }

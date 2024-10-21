@@ -110,34 +110,31 @@ class RideService {
         }
     }
 
+    func addRide(_ ride: Ride, completion: @escaping (Error?) -> Void) {
+        do {
+            let _ = try db.collection("rides").document(ride.id).setData(from: ride)
+            completion(nil)
+        } catch let error {
+            completion(error)
+        }
+    }
 
     func fetchRideHistory(for userId: String) -> AnyPublisher<[RideHistory], Error> {
         return Future { promise in
-            self.db.collection("rideHistory").whereField("userId", isEqualTo: userId).getDocuments { (snapshot, error) in
-                if let error = error {
-                    promise(.failure(error))
-                    return
+            self.db.collection("rides")
+                .whereField("userId", isEqualTo: userId)
+                .getDocuments { (querySnapshot, error) in
+                    if let error = error {
+                        promise(.failure(error))
+                    } else {
+                        let rideHistories = querySnapshot?.documents.compactMap { document -> RideHistory? in
+                            return try? document.data(as: RideHistory.self)
+                        } ?? []
+                        promise(.success(rideHistories))
+                    }
                 }
-                guard let documents = snapshot?.documents else {
-                    promise(.success([]))
-                    return
-                }
-                let rideHistories = documents.compactMap { try? $0.data(as: RideHistory.self) }
-                promise(.success(rideHistories))
-            }
         }
         .eraseToAnyPublisher()
-    }
-    
-    func addRide(_ ride: Ride, completion: @escaping (Error?) -> Void) {
-        do {
-            let _ = try db.collection("rides").addDocument(from: ride) { error in
-                completion(error)
-            }
-        } catch {
-            print("Error adding ride: \(error)")
-            completion(error)
-        }
     }
 
 }
