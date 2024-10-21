@@ -96,4 +96,16 @@ class RideService {
             .setFailureType(to: Error.self)
             .eraseToAnyPublisher()
     }
+    
+    func addRide(_ ride: Ride, completion: @escaping (Error?) -> Void) {
+        do {
+            let _ = try db.collection("rides").addDocument(from: ride) { error in
+                completion(error)
+            }
+        } catch {
+            print("Error adding ride: \(error)")
+            completion(error)
+        }
+    }
+
 }

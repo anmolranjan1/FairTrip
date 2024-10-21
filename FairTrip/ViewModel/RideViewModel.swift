@@ -29,7 +29,6 @@ class RideViewModel: ObservableObject {
     }
     
     // Calculate fare based on pickup and dropoff locations
-    // Calculate fare based on pickup and dropoff locations
     func calculateFare() {
         guard let pickup = pickupLocation, let dropoff = dropoffLocation else {
             errorMessage = "Pickup and dropoff locations must be set."
@@ -37,10 +36,10 @@ class RideViewModel: ObservableObject {
         }
 
         // Create CLLocation instances for distance calculation
-        let pickupLocation = CLLocation(latitude: pickup.latitude, longitude: pickup.longitude)
-        let dropoffLocation = CLLocation(latitude: dropoff.latitude, longitude: dropoff.longitude)
+        let pickupCLLocation = CLLocation(latitude: pickup.latitude, longitude: pickup.longitude)
+        let dropoffCLLocation = CLLocation(latitude: dropoff.latitude, longitude: dropoff.longitude)
 
-        let distance = pickupLocation.distance(from: dropoffLocation) / 1000 // Convert to kilometers
+        let distance = pickupCLLocation.distance(from: dropoffCLLocation) / 1000 // Convert to kilometers
         let baseFare = 5.0 // Example base fare
         let perKmFare = 2.0 // Example fare per kilometer
 
@@ -79,7 +78,6 @@ class RideViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    
     // Fetch ride history for the logged-in user
     func fetchRideHistory() {
         guard let userId = authService.user?.id else {
@@ -99,7 +97,7 @@ class RideViewModel: ObservableObject {
             }, receiveValue: { rideHistories in
                 self.rideHistory = rideHistories.map { history in
                     Ride(id: history.id,
-                         userId: "", // If you have user ID, set it here
+                         userId: userId, // Set user ID here
                          pickupLocation: CLLocationCoordinate2D(latitude: history.pickupLocation.latitude, longitude: history.pickupLocation.longitude),
                          dropoffLocation: CLLocationCoordinate2D(latitude: history.dropOffLocation.latitude, longitude: history.dropOffLocation.longitude),
                          timestamp: history.timestamp,
@@ -110,37 +108,7 @@ class RideViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-//    // Load available drivers
-//    func loadAvailableDrivers(completion: @escaping ([Driver]) -> Void) {
-//        rideService.fetchAvailableDrivers()
-//            .receive(on: DispatchQueue.main)
-//            .sink(receiveCompletion: { completion in
-//                switch completion {
-//                case .finished:
-//                    break
-//                case .failure(let error):
-//                    self.errorMessage = error.localizedDescription
-//                }
-//            }, receiveValue: { drivers in
-//                completion(drivers)
-//            })
-//            .store(in: &cancellables)
-//    }
-    
-    // Load available drivers (already present in your code)
-    func loadAvailableDrivers(completion: @escaping ([Driver]) -> Void) {
-        rideService.fetchAvailableDrivers()
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                // Handle error or success
-            }, receiveValue: { drivers in
-                self.availableDrivers = drivers // Store fetched drivers
-                completion(drivers)
-            })
-            .store(in: &cancellables)
-    }
-    
-    // Function to fetch available drivers
+    // Load available drivers
     func fetchAvailableDrivers() {
         rideService.fetchAvailableDrivers()
             .receive(on: DispatchQueue.main)
@@ -156,5 +124,15 @@ class RideViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
+    
+    func saveRide(_ ride: Ride, completion: @escaping (Bool) -> Void) {
+        rideService.addRide(ride) { error in
+            if let error = error {
+                print("Error adding ride: \(error)")
+                completion(false)
+            } else {
+                completion(true)
+            }
+        }
+    }
 }
-
