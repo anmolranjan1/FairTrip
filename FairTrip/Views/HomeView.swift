@@ -23,6 +23,7 @@ struct HomeView: View {
     
     @StateObject private var locationManager = LocationManager()
     @StateObject private var searchCompleter = LocationSearchCompleter()
+    @State private var navigateToRideRequest = false
 
     var body: some View {
         NavigationView {
@@ -132,6 +133,8 @@ struct HomeView: View {
                     viewModel.timestamp = timestamp
                     viewModel.calculateFare() // Calculate fare before requesting the ride
                     viewModel.requestRide()  // No need to pass arguments
+                    
+                    navigateToRideRequest = true
                 }) {
                     Text("Order Now")
                         .frame(maxWidth: .infinity)
@@ -141,6 +144,10 @@ struct HomeView: View {
                         .cornerRadius(10)
                 }
                 .padding()
+                
+                NavigationLink(destination: RideRequestView(viewModel: viewModel), isActive: $navigateToRideRequest) {
+                    EmptyView() // Invisible navigation link
+                }
                 
                 Button(action: {
                     rideService.addDummyDriver()

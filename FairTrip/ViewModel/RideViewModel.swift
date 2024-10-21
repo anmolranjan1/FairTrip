@@ -17,6 +17,7 @@ class RideViewModel: ObservableObject {
     @Published var fare: Double = 0.0
     @Published var timestamp: Date = Date()
     @Published var errorMessage: String?
+    @Published var availableDrivers: [Driver]? // Store available drivers
 
     private var cancellables = Set<AnyCancellable>()
     private let rideService: RideService
@@ -46,13 +47,12 @@ class RideViewModel: ObservableObject {
         fare = baseFare + (distance * perKmFare)
     }
 
-    // Request a ride
     func requestRide() {
         guard let pickup = pickupLocation, let dropoff = dropoffLocation else {
             errorMessage = "Please set both pickup and dropoff locations."
             return
         }
-        
+
         let ride = Ride(id: UUID().uuidString,
                         userId: authService.user?.id ?? "", // Make sure you are passing userId
                         pickupLocation: pickup,
@@ -60,7 +60,7 @@ class RideViewModel: ObservableObject {
                         timestamp: timestamp,
                         fare: fare,
                         driverId: selectedDriver?.id ?? "") // Ensure the correct order and parameter names
-        
+
         rideService.requestRide(ride: ride)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
@@ -78,6 +78,7 @@ class RideViewModel: ObservableObject {
             })
             .store(in: &cancellables)
     }
+
     
     // Fetch ride history for the logged-in user
     func fetchRideHistory() {
@@ -109,18 +110,31 @@ class RideViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
-    // Load available drivers
+//    // Load available drivers
+//    func loadAvailableDrivers(completion: @escaping ([Driver]) -> Void) {
+//        rideService.fetchAvailableDrivers()
+//            .receive(on: DispatchQueue.main)
+//            .sink(receiveCompletion: { completion in
+//                switch completion {
+//                case .finished:
+//                    break
+//                case .failure(let error):
+//                    self.errorMessage = error.localizedDescription
+//                }
+//            }, receiveValue: { drivers in
+//                completion(drivers)
+//            })
+//            .store(in: &cancellables)
+//    }
+    
+    // Load available drivers (already present in your code)
     func loadAvailableDrivers(completion: @escaping ([Driver]) -> Void) {
         rideService.fetchAvailableDrivers()
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished:
-                    break
-                case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                }
+                // Handle error or success
             }, receiveValue: { drivers in
+                self.availableDrivers = drivers // Store fetched drivers
                 completion(drivers)
             })
             .store(in: &cancellables)

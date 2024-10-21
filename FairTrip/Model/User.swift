@@ -11,11 +11,11 @@ struct User: Identifiable, Codable {
     var id: String
     var name: String
     var email: String
-    var phoneNumber: String?
+    var phoneNumber: String
     var profilePictureURL: String?
     
     // Additional initializer for easier user creation
-    init(id: String, name: String, email: String, phoneNumber: String? = nil, profilePictureURL: String? = nil) {
+    init(id: String, name: String, email: String, phoneNumber: String, profilePictureURL: String? = nil) {
         self.id = id
         self.name = name
         self.email = email

@@ -11,6 +11,7 @@ import Combine
 class SignUpViewModel: ObservableObject {
     @Published var name: String = "" // Adding name to the view model
     @Published var email: String = ""
+    @Published var phone: String = "" // Change to String to accommodate leading zeros
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
     @Published var errorMessage: String?
@@ -24,10 +25,10 @@ class SignUpViewModel: ObservableObject {
         self.authService = authService
         self.isSignedUpBinding = isSignedUp // Set the Binding
     }
-    
+
     // Perform signup action
     func signUp() {
-        guard !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty, !name.isEmpty else {
+        guard !email.isEmpty, !password.isEmpty, !confirmPassword.isEmpty, !name.isEmpty, !phone.isEmpty else {
             errorMessage = "All fields are required."
             return
         }
@@ -37,7 +38,8 @@ class SignUpViewModel: ObservableObject {
             return
         }
         
-        authService.signUp(email: email, password: password)
+        // Pass the name and phone number to the signup method
+        authService.signUp(email: email, password: password, name: name, phone: phone)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
                 switch completion {

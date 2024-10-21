@@ -1,3 +1,4 @@
+//
 //  SignUpView.swift
 //  FairTrip
 //
@@ -28,12 +29,16 @@ struct SignUpView: View {
                 TextField("Name", text: $viewModel.name)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-                    .frame(height: 30)
 
                 TextField("Email", text: $viewModel.email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
                     .autocapitalization(.none)
+
+                TextField("Phone", text: $viewModel.phone) // Updated to bind phone number
+                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                    .padding()
+                    .keyboardType(.phonePad) // Optional: Set keyboard type to phone pad
 
                 SecureField("Password", text: $viewModel.password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -43,7 +48,7 @@ struct SignUpView: View {
                 SecureField("Confirm Password", text: $viewModel.confirmPassword)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-                
+
                 Spacer()
 
                 Button(action: {

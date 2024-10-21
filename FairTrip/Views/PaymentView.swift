@@ -8,11 +8,30 @@
 import SwiftUI
 
 struct PaymentView: View {
+    @ObservedObject var viewModel: RideViewModel
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        VStack {
+            Text("Payment")
+                .font(.largeTitle)
+                .padding()
+            
+            Text("Fare: \(viewModel.fare, specifier: "%.2f")")
+                .font(.title2)
+                .padding()
+
+            Button(action: {
+                // Handle payment logic here
+            }) {
+                Text("Confirm Payment")
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.green)
+                    .foregroundColor(.white)
+                    .cornerRadius(10)
+            }
+            .padding()
+        }
     }
 }
 
-#Preview {
-    PaymentView()
-}

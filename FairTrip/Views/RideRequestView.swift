@@ -6,107 +6,82 @@
 //
 
 import SwiftUI
-import MapKit
 
 struct RideRequestView: View {
-    @Environment(\.presentationMode) var presentationMode
     @ObservedObject var viewModel: RideViewModel
-    var pickupLocation: String
-    var dropoffLocation: String
-    var timestamp: Date
-
     @State private var selectedDriver: Driver?
-    @State private var distance: String = ""
-    @State private var estimatedTime: String = ""
-    
+    @State private var showPaymentView = false
+
     var body: some View {
         VStack {
-            Text("Ride Request Confirmation")
-                .font(.largeTitle)
+            Text("Available Drivers")
+                .font(.title)
                 .padding()
-                .foregroundColor(.primaryColor) // Custom primary color
 
-            Text("Pickup Location: \(pickupLocation)")
-                .padding()
-                .foregroundColor(.textColor) // Custom text color
+//            // Display available drivers
+//            if let drivers = viewModel.availableDrivers {
+//                List(drivers) { driver in
+//                    HStack {
+//                        VStack(alignment: .leading) {
+//                            Text("Driver: \(driver.name)")
+//                            Text("Vehicle: \(driver.vehicleModel.model)")
+//                            Text("Rating: \(driver.rating, specifier: "%.1f")")
+//                        }
+//                        Spacer()
+//                        Button(action: {
+//                            selectedDriver = driver
+//                            viewModel.selectedDriver = driver
+//                        }) {
+//                            Text(selectedDriver?.id == driver.id ? "Selected" : "Select")
+//                                .padding(10)
+//                                .background(selectedDriver?.id == driver.id ? Color.green : Color.blue)
+//                                .foregroundColor(.white)
+//                                .cornerRadius(8)
+//                        }
+//                    }
+//                }
+//            } else {
+//                Text("Loading drivers...")
+//                    .onAppear {
+//                        viewModel.loadAvailableDrivers { drivers in
+//                            viewModel.availableDrivers = drivers
+//                        }
+//                    }
+//            }
 
-            Text("Dropoff Location: \(dropoffLocation)")
-                .padding()
-                .foregroundColor(.textColor) // Custom text color
-
-            Text("Requested Time: \(timestamp.formatted())")
-                .padding()
-                .foregroundColor(.textColor) // Custom text color
-
-            if let driver = selectedDriver {
-                Text("Selected Driver: \(driver.name)")
-                    .foregroundColor(.textColor) // Custom text color
-                Text("Car Model: \(driver.vehicleModel)")
-                    .foregroundColor(.textColor) // Custom text color
-                Text("License Plate: \(driver.licensePlate)")
-                    .foregroundColor(.textColor) // Custom text color
-            } else {
-                Text("No driver selected yet.")
-                    .foregroundColor(.textColor) // Custom text color
-            }
-
-            Spacer()
-
-            Button(action: {
-                // Call method to fetch distance and time estimates here
-                fetchRideDetails()
-            }) {
-                Text("Get Ride Details")
-                    .frame(maxWidth: .infinity)
+            // Show estimated fare
+            HStack {
+                Text("Estimated Fare: \(viewModel.fare, specifier: "%.2f")")
+                    .font(.headline)
                     .padding()
-                    .background(Color.primaryColor) // Custom primary color
-                    .foregroundColor(.backgroundColor) // Custom background color
-                    .cornerRadius(10)
-            }
-            .padding()
-
-            if !distance.isEmpty {
-                Text("Distance: \(distance)")
-                    .foregroundColor(.textColor) // Custom text color
-                Text("Estimated Time: \(estimatedTime)")
-                    .foregroundColor(.textColor) // Custom text color
+                Spacer()
             }
 
+            // Pay Now button to navigate to payment
             Button(action: {
-                // Action for payment
+                showPaymentView = true
             }) {
                 Text("Pay Now")
                     .frame(maxWidth: .infinity)
                     .padding()
-                    .background(Color.green) // Or a custom color
+                    .background(Color.primaryColor)
                     .foregroundColor(.white)
                     .cornerRadius(10)
             }
             .padding()
-        }
-        .padding()
-        .onAppear {
-            // Load drivers or select a default one
-            loadDrivers()
-        }
-        .background(Color.backgroundColor) // Set the background color
-    }
-
-    private func loadDrivers() {
-        viewModel.loadAvailableDrivers { drivers in
-            if let firstDriver = drivers.first {
-                selectedDriver = firstDriver
+            .disabled(selectedDriver == nil) // Disable if no driver is selected
+            .sheet(isPresented: $showPaymentView) {
+                PaymentView(viewModel: viewModel) // Navigate to payment screen
             }
         }
-    }
-
-    private func fetchRideDetails() {
-        // Simulating fetching distance and time
-        distance = "10 km" // Replace with actual calculation
-        estimatedTime = "20 minutes" // Replace with actual calculation
+        .padding()
+        .navigationTitle("Ride Request")
     }
 }
 
-#Preview {
-    RideRequestView(viewModel: RideViewModel(rideService: RideService(), authService: AuthService()), pickupLocation: "Location A", dropoffLocation: "Location B", timestamp: Date())
-}
+
+
+
+//#Preview {
+//    RideRequestView(viewModel: RideViewModel(rideService: RideService(), authService: AuthService()), pickupLocation: "Location A", dropoffLocation: "Location B", timestamp: Date())
+//}
