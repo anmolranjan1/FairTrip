@@ -54,7 +54,7 @@ struct RideRequestView: View {
             
             // Show success message
             if showSuccessMessage {
-                Text("Payment successful! Redirecting...")
+                Text("Payment successful! Go back to homepage...")
                     .foregroundColor(.green)
                     .padding()
             }

@@ -12,6 +12,9 @@ struct RideHistoryView: View {
     @State var userId: String // Assume userId is passed to this view
 
     var body: some View {
+        Text("Ride Details")
+            .font(.largeTitle)
+            .padding()
         List(viewModel.rideHistories) { rideHistory in
             VStack(alignment: .leading) {
                 Text("Pickup: \(rideHistory.pickupLocation.latitude), \(rideHistory.pickupLocation.longitude)")

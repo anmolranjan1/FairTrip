@@ -76,7 +76,7 @@ struct PaymentView: View {
         viewModel.saveRide(ride) { success in
             if success {
                 // Show success message
-                successMessage = "Payment successful! Go back!"
+                successMessage = "Payment successful! Go back to homepage!"
                 showSuccessMessage = true
                 
                 // Navigate back to home screen after a delay

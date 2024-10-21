@@ -38,6 +38,8 @@ class SignUpViewModel: ObservableObject {
             return
         }
         
+        print("Attempting to sign up user: \(email)")
+        
         // Pass the name and phone number to the signup method
         authService.signUp(email: email, password: password, name: name, phone: phone)
             .receive(on: DispatchQueue.main)
@@ -47,11 +49,13 @@ class SignUpViewModel: ObservableObject {
                     break
                 case .failure(let error):
                     self.errorMessage = error.localizedDescription
+                        print("Sign up failed: \(error)")
                 }
             }, receiveValue: { user in
                 self.isSignedUp = true // Update isSignedUp state
                 self.isSignedUpBinding.wrappedValue = true // Update binding state
                 self.authService.user = user // Set the newly created user
+                print("User signed up successfully: \(user)")
             })
             .store(in: &cancellables)
     }

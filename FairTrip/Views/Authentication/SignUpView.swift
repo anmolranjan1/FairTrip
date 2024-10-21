@@ -68,6 +68,11 @@ struct SignUpView: View {
                         .foregroundColor(.accentColor) // Updated to use custom accent color
                 }
                 .padding()
+                
+                // NavigationLink for HomeView
+                NavigationLink(destination: HomeView().navigationBarBackButtonHidden(true).navigationBarHidden(true), isActive: $navigateToHome) {
+                    EmptyView()
+                }
 
                 Spacer()
             }
@@ -78,16 +83,6 @@ struct SignUpView: View {
                     navigateToHome = true // Trigger navigation
                 }
             }
-            .navigationTitle("Sign Up")
-            .background(
-                // NavigationLink for redirection
-                NavigationLink(
-                    destination: HomeView()
-                        .navigationBarBackButtonHidden(true)
-                        .navigationBarHidden(true), isActive: $navigateToHome) {
-                    EmptyView()
-                }
-            )
         }
         .navigationBarBackButtonHidden(true)
     }
