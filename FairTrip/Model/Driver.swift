@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct Driver: Identifiable, Codable {
-    var id: String // Unique identifier for the driver
+    @DocumentID var id: String? // Unique identifier for the driver
     var name: String // Driver's name
     var vehicleModel: String // Model of the vehicle driven by the driver
     var licensePlate: String // License plate number of the vehicle

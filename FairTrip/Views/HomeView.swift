@@ -1,8 +1,7 @@
+// HomeView.swift
+// FairTrip
 //
-//  HomeView.swift
-//  FairTrip
-//
-//  Created by Anmol Ranjan on 20/10/24.
+// Created by Anmol Ranjan on 20/10/24.
 //
 
 import SwiftUI
@@ -144,7 +143,7 @@ struct HomeView: View {
                 
                 Button(action: {
                     rideService.addDummyDriver()
-                    rideService.addDummyRide()
+                    rideService.addDummyRide(userId: userId) // Pass userId to addDummyRide
                 }) {
                     Text("Add Dummy Data")
                         .frame(maxWidth: .infinity)
@@ -162,7 +161,7 @@ struct HomeView: View {
                 ProfileView() // Assuming you have a ProfileView to show
             }
             .sheet(isPresented: $showRideHistory) {
-                RideHistoryView(viewModel: rideHistoryViewModel, userId: userId) // Pass the userId
+                RideHistoryView(userId: userId, rideService: rideService, authService: authService) // Pass the userId
             }
             .background(Color.backgroundColor)
         }

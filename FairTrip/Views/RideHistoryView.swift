@@ -1,57 +1,64 @@
-////
-////  RideHistoryView.swift
-////  FairTrip
-////
-////  Created by Anmol Ranjan on 20/10/24.
-////
 //
+//  RideHistoryView.swift
+//  FairTrip
+//
+//  Created by Anmol Ranjan on 20/10/24.
+//
+
 import SwiftUI
 
 struct RideHistoryView: View {
-    @ObservedObject var viewModel: RideHistoryViewModel
+    @StateObject private var viewModel: RideViewModel
     var userId: String // Assume userId is passed to this view
 
+    init(userId: String, rideService: RideService, authService: AuthService) {
+        self.userId = userId
+        self._viewModel = StateObject(wrappedValue: RideViewModel(rideService: rideService, authService: authService))
+    }
+
     var body: some View {
-        Text("Ride Details")
-            .font(.largeTitle)
-            .padding()
-        List(viewModel.rideHistories) { rideHistory in
-            VStack(alignment: .leading) {
-                Text("Pickup: \(rideHistory.pickupLocation.latitude), \(rideHistory.pickupLocation.longitude)")
-                Text("Dropoff: \(rideHistory.dropOffLocation.latitude), \(rideHistory.dropOffLocation.longitude)")
-                Text("Fare: \(rideHistory.fare, specifier: "%.2f")")
-                Text("Driver: \(rideHistory.driver.name)")
-                Text("Status: \(rideHistory.rideStatus.rawValue.capitalized)")
-                Text("Timestamp: \(viewModel.dateFormatter.string(from: rideHistory.timestamp))")
+        ScrollView {
+            VStack {
+                Text("Ride History")
+                    .font(.largeTitle)
+                    .padding()
+
+                // Display error message if available
+                if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                }
+
+                // Display ride history manually using VStack
+                ForEach(viewModel.rideHistory, id: \.id) { rideHistory in
+                    VStack(alignment: .leading) {
+                        Text("Pickup: \(rideHistory.pickupLocation.latitude), \(rideHistory.pickupLocation.longitude)")
+                        Text("Dropoff: \(rideHistory.dropoffLocation.latitude), \(rideHistory.dropoffLocation.longitude)")
+                        Text("Fare: \(rideHistory.fare, specifier: "%.2f")")
+                        Text("Driver: \(rideHistory.driver?.name ?? "Unknown")") // Assuming Driver has a 'name' property
+                        Text("Timestamp: \(rideHistory.timestamp, formatter: dateFormatter)")
+                            .padding(.bottom)
+
+                        Divider() // Optional divider between rides
+                    }
+                    .padding()
+                    .background(Color(.systemGray6)) // Optional background color for each ride
+                    .cornerRadius(10) // Optional corner radius
+                }
             }
-        }
-        .onAppear {
-            print("RideHistoryView appeared. Fetching ride history for user: \(userId)") // Debugging line
-            viewModel.refreshRideHistory(for: userId) // Refresh ride history when the view appears
+            .padding()
+            .onAppear {
+                viewModel.fetchRideHistory() // Fetch rides on appear
+            }
         }
         .navigationTitle("Ride History")
     }
-}
-
-
-struct RideDetailView: View {
-    var ride: RideHistory
     
-    var body: some View {
-        VStack {
-            Text("Ride Details")
-                .font(.largeTitle)
-                .padding()
-            Text("Pickup Location: \(ride.pickupLocation.latitude), \(ride.pickupLocation.longitude)")
-            Text("Drop-off Location: \(ride.dropOffLocation.latitude), \(ride.dropOffLocation.longitude)")
-            Text("Driver: \(ride.driver.name) (\(ride.driver.vehicleModel))")
-            Text("Fare: ₹\(ride.fare, specifier: "%.2f")")
-            Text("Status: \(ride.rideStatus.rawValue.capitalized)")
-            Text("Date: \(ride.timestamp.formatted())")
-                .padding(.top)
-            Spacer()
-        }
-        .padding()
-        .navigationTitle("Ride Detail")
+    private var dateFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        formatter.timeStyle = .short
+        return formatter
     }
 }

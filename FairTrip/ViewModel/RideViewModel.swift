@@ -46,7 +46,7 @@ class RideViewModel: ObservableObject {
         fare = baseFare + (distance * perKmFare)
     }
 
-    // Inside RideViewModel class
+    // Request a ride
     func requestRide() {
         guard let pickup = pickupLocation, let dropoff = dropoffLocation else {
             errorMessage = "Please set both pickup and dropoff locations."
@@ -59,7 +59,7 @@ class RideViewModel: ObservableObject {
                         dropoffLocation: dropoff,
                         timestamp: timestamp,
                         fare: fare,
-                        driverId: selectedDriver?.id ?? "")
+                        driver: selectedDriver) // Updated driver ID
 
         rideService.requestRide(ride: ride) { success in
             if success {
@@ -71,8 +71,7 @@ class RideViewModel: ObservableObject {
         }
     }
 
-
-    // Fetch ride history for the logged-in user
+//    // Fetch ride history for the logged-in user
     func fetchRideHistory() {
         guard let userId = authService.user?.id else {
             errorMessage = "User not logged in."
@@ -92,15 +91,36 @@ class RideViewModel: ObservableObject {
                 self.rideHistory = rideHistories.map { history in
                     Ride(id: history.id,
                          userId: userId, // Set user ID here
-                         pickupLocation: CLLocationCoordinate2D(latitude: history.pickupLocation.latitude, longitude: history.pickupLocation.longitude),
-                         dropoffLocation: CLLocationCoordinate2D(latitude: history.dropOffLocation.latitude, longitude: history.dropOffLocation.longitude),
+                         pickupLocation: history.pickupLocation,
+                         dropoffLocation: history.dropoffLocation,
                          timestamp: history.timestamp,
                          fare: history.fare,
-                         driverId: history.driver.id) // Make sure driver exists
+                         driver: history.driver) // Ensure driver exists
                 }
             })
             .store(in: &cancellables)
     }
+    
+//    // Fetch ride history for the user
+//    func fetchRideHistory() {
+//        guard let userId = authService.user?.id else {
+//            errorMessage = "User ID is not available."
+//            return
+//        }
+//
+//        rideService.fetchRideHistory(for: userId)
+//            .sink(receiveCompletion: { completion in
+//                switch completion {
+//                case .failure(let error):
+//                    self.errorMessage = "Error fetching ride history: \(error.localizedDescription)"
+//                case .finished:
+//                    break
+//                }
+//            }, receiveValue: { rides in
+//                self.rideHistory = rides
+//            })
+//            .store(in: &cancellables)
+//    }
 
     // Load available drivers
     func fetchAvailableDrivers() {
@@ -119,6 +139,7 @@ class RideViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    // Save ride
     func saveRide(_ ride: Ride, completion: @escaping (Bool) -> Void) {
         rideService.addRide(ride) { error in
             if let error = error {

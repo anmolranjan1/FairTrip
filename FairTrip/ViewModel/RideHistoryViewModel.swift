@@ -7,14 +7,12 @@
 
 import Foundation
 import Combine
+import Firebase
 
 class RideHistoryViewModel: ObservableObject {
-    @Published var rideHistories: [RideHistory] = []
+    @Published var rideHistories: [Ride] = []
     private var cancellables = Set<AnyCancellable>()
     
-    private let rideService = RideService()
-    
-    // DateFormatter to display the timestamp in a readable format
     let dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
         formatter.dateStyle = .medium
@@ -22,29 +20,22 @@ class RideHistoryViewModel: ObservableObject {
         return formatter
     }()
     
-    // Function to fetch ride history for a specific user
-    func fetchRideHistory(for userId: String) {
-        print("Fetching ride history for user: \(userId)") // Debugging line
-        rideService.fetchRideHistory(for: userId)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished:
-                    print("Fetch completed successfully") // Debugging line
-                case .failure(let error):
-                    print("Error fetching ride history: \(error.localizedDescription)") // Debugging line
-                }
-            }, receiveValue: { rideHistories in
-                print("Fetched ride histories: \(rideHistories)") // Debugging line
-                self.rideHistories = rideHistories
-            })
-            .store(in: &cancellables)
-    }
-    
-    // Call this function to refresh ride history whenever needed
+    // Fetch ride history for a specific user
     func refreshRideHistory(for userId: String) {
-        fetchRideHistory(for: userId)
+        let db = Firestore.firestore()
+        
+        db.collection("rides").whereField("userId", isEqualTo: userId)
+            .getDocuments { [weak self] (snapshot, error) in
+                if let error = error {
+                    print("Error fetching ride histories: \(error)")
+                    return
+                }
+                guard let documents = snapshot?.documents else { return }
+                
+                // Ensure that the ride data is correctly decoded into Ride objects
+                self?.rideHistories = documents.compactMap { doc in
+                    try? doc.data(as: Ride.self)
+                }
+            }
     }
 }
-
-

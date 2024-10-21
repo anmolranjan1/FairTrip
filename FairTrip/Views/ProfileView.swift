@@ -91,6 +91,7 @@ struct ProfileView: View {
             .navigationTitle("Profile")
             .onAppear {
                 viewModel.fetchProfile()
+                viewModel.updateProfile()
             }
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(image: $inputImage, onImagePicked: {

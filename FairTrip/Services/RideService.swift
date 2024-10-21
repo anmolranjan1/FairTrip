@@ -1,3 +1,4 @@
+//
 //  RideService.swift
 //  FairTrip
 //
@@ -26,11 +27,23 @@ class RideService {
     }
 
     // Function to add a dummy ride
-    func addDummyRide() {
+    func addDummyRide(userId: String) {
         let pickupLocation = CLLocationCoordinate2D(latitude: 28.4742, longitude: 77.1159) // Example coordinates (Faridabad)
         let dropoffLocation = CLLocationCoordinate2D(latitude: 28.6431, longitude: 77.2225) // Example coordinates (Greater Noida)
-        
-        let ride = Ride(id: UUID().uuidString, userId: "user_id_example", pickupLocation: pickupLocation, dropoffLocation: dropoffLocation, timestamp: Date(), fare: 300.0, driverId: "driver_id_example_2")
+
+        // Fetch a dummy driver for the ride
+        let driverLocation = DriverLocation(latitude: 28.4595, longitude: 77.0266) // Example driver location
+        let driver = Driver(id: UUID().uuidString, name: "Alice Johnson", vehicleModel: "Ford Focus", licensePlate: "XYZ 5678", rating: 4.7, location: driverLocation)
+
+        let ride = Ride(
+            id: UUID().uuidString,
+            userId: userId,
+            pickupLocation: pickupLocation,
+            dropoffLocation: dropoffLocation,
+            timestamp: Date(),
+            fare: 300.0,
+            driver: driver // Use the Driver object directly
+        )
 
         do {
             let _ = try db.collection("rides").addDocument(from: ride)
@@ -39,25 +52,8 @@ class RideService {
             print("Error adding ride: \(error)")
         }
     }
-
-    // Function to add dummy ride history
-    func addDummyRideHistory() {
-        let pickupLocation = CLLocationCoordinate2D(latitude: 28.6431, longitude: 77.2225) // Example coordinates (Greater Noida)
-        let dropoffLocation = CLLocationCoordinate2D(latitude: 28.4595, longitude: 77.0266) // Example coordinates (Gurgaon)
-        
-        let driver = Driver(id: "driver_id_example_2", name: "Alice Johnson", vehicleModel: "Ford Focus", licensePlate: "XYZ 5678", rating: 4.7, location: DriverLocation(latitude: 28.4595, longitude: 77.0266))
-
-        let rideHistory = RideHistory(id: UUID().uuidString, pickupLocation: pickupLocation, dropOffLocation: dropoffLocation, timestamp: Date(), driver: driver, fare: 300.0, rideStatus: .completed)
-
-        do {
-            let _ = try db.collection("rideHistory").addDocument(from: rideHistory)
-            print("Ride history added successfully!")
-        } catch {
-            print("Error adding ride history: \(error)")
-        }
-    }
     
-    
+    // Fetch available drivers
     func fetchAvailableDrivers() -> AnyPublisher<[Driver], Error> {
         return Future { promise in
             self.db.collection("drivers").getDocuments { (snapshot, error) in
@@ -76,6 +72,7 @@ class RideService {
         .eraseToAnyPublisher()
     }
 
+    // Request a ride and save to ride history
     func requestRide(ride: Ride, completion: @escaping (Bool) -> Void) {
         do {
             let _ = try db.collection("rides").addDocument(from: ride) { error in
@@ -83,19 +80,9 @@ class RideService {
                     print("Error adding ride: \(error)")
                     completion(false)
                 } else {
-                    // Save to ride history
-                    let rideHistory = RideHistory(
-                        id: UUID().uuidString,
-                        pickupLocation: ride.pickupLocation,
-                        dropOffLocation: ride.dropoffLocation,
-                        timestamp: ride.timestamp,
-                        driver: Driver(id: ride.driverId, name: "Dummy Driver", vehicleModel: "Dummy Model", licensePlate: "Dummy Plate", rating: 4.5, location: DriverLocation(latitude: ride.pickupLocation.latitude, longitude: ride.pickupLocation.longitude)),
-                        fare: ride.fare,
-                        rideStatus: .ongoing // or .completed based on your logic
-                    )
-                    
+                    // Save to ride history (same collection)
                     do {
-                        let _ = try self.db.collection("rideHistory").addDocument(from: rideHistory)
+                        let _ = try self.db.collection("rides").addDocument(from: ride)
                         print("Ride history added successfully!")
                         completion(true)
                     } catch {
@@ -110,31 +97,33 @@ class RideService {
         }
     }
 
+    // Add a ride
     func addRide(_ ride: Ride, completion: @escaping (Error?) -> Void) {
         do {
-            let _ = try db.collection("rides").document(ride.id).setData(from: ride)
+            let _ = try db.collection("rides").document(ride.id!).setData(from: ride)
             completion(nil)
         } catch let error {
             completion(error)
         }
     }
 
-    func fetchRideHistory(for userId: String) -> AnyPublisher<[RideHistory], Error> {
+    func fetchRideHistory(for userId: String) -> AnyPublisher<[Ride], Error> {
+        print("Fetching ride history for user: \(userId)")
         return Future { promise in
-            self.db.collection("rides")
+            self.db.collection("rides") // Querying the same collection for ride history
                 .whereField("userId", isEqualTo: userId)
                 .getDocuments { (querySnapshot, error) in
                     if let error = error {
                         promise(.failure(error))
                     } else {
-                        let rideHistories = querySnapshot?.documents.compactMap { document -> RideHistory? in
-                            return try? document.data(as: RideHistory.self)
+                        let rides = querySnapshot?.documents.compactMap { document -> Ride? in
+                            return try? document.data(as: Ride.self)
                         } ?? []
-                        promise(.success(rideHistories))
+                        print("Fetched rides: \(rides)") // Debugging line
+                        promise(.success(rides))
                     }
                 }
         }
         .eraseToAnyPublisher()
     }
-
 }

@@ -1,20 +1,6 @@
-//
-//  RideRequestView.swift
-//  FairTrip
-//
-//  Created by Anmol Ranjan on 20/10/24.
-//
-
 import SwiftUI
 
 struct RideRequestView: View {
-    
-    //    @ObservedObject var viewModel: RideViewModel
-    //    var selectedDriver: Driver?
-    //    @Environment(\.presentationMode) var presentationMode // For dismissing the view
-    //
-    //    @State private var showSuccessMessage: Bool = false // State for success message
-    //    @State private var successMessage: String = "" // Store the success message
     @ObservedObject var viewModel: RideViewModel
     @State private var selectedDriver: Driver?
     @State private var showSuccessMessage: Bool = false // State for success message
@@ -44,20 +30,35 @@ struct RideRequestView: View {
                     selectedDriver = driver // Update selected driver
                 }
             }
-
-            // Pay Now button to navigate to payment
-            Button(action: {
-                confirmPayment()
-            }) {
-                Text("Pay Now \(viewModel.fare, specifier: "%.2f")")
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.primaryColor)
-                    .foregroundColor(.white)
-                    .cornerRadius(10)
+            
+            if !showSuccessMessage {
+                // Pay Now button to navigate to payment
+                Button(action: {
+                    confirmPayment()
+                }) {
+                    Text("Pay Now \(viewModel.fare, specifier: "%.2f")")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.primaryColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding()
+                .disabled(selectedDriver == nil) // Disable if no driver is selected
+            } else {
+                Button(action: {
+//                    confirmPayment()
+                }) {
+                    Text("Paid \(viewModel.fare, specifier: "%.2f")")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.primaryColor)
+                        .foregroundColor(.white)
+                        .cornerRadius(10)
+                }
+                .padding()
+                .disabled(selectedDriver == nil) // Disable if no driver is selected
             }
-            .padding()
-            .disabled(selectedDriver == nil) // Disable if no driver is selected
             
             // Show success message
             if showSuccessMessage {
@@ -74,14 +75,21 @@ struct RideRequestView: View {
     }
 
     private func confirmPayment() {
+        guard let pickupLocation = viewModel.pickupLocation,
+              let dropoffLocation = viewModel.dropoffLocation,
+              let selectedDriver = selectedDriver else {
+            print("Invalid ride details.")
+            return
+        }
+
         let ride = Ride(
-            id: UUID().uuidString,
+            id: UUID().uuidString, // Use a UUID for the ride ID
             userId: "user_id_example", // Replace with actual user ID
-            pickupLocation: viewModel.pickupLocation!,
-            dropoffLocation: viewModel.dropoffLocation!,
+            pickupLocation: pickupLocation,
+            dropoffLocation: dropoffLocation,
             timestamp: Date(),
             fare: viewModel.fare,
-            driverId: selectedDriver?.id ?? "driver_id_example" // Replace with actual driver ID
+            driver: selectedDriver // This is correct as `Driver` is passed
         )
         
         // Save the ride to Firebase
@@ -106,5 +114,4 @@ struct RideRequestView: View {
             }
         }
     }
-
 }
