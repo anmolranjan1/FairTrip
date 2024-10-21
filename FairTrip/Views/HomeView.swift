@@ -176,6 +176,8 @@ struct HomeView: View {
             }
             .background(Color.backgroundColor)
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
     }
 }
 

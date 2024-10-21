@@ -76,7 +76,10 @@ struct SignUpView: View {
             .navigationTitle("Sign Up")
             .background(
                 // NavigationLink for redirection
-                NavigationLink(destination: HomeView(), isActive: $navigateToHome) {
+                NavigationLink(
+                    destination: HomeView()
+                        .navigationBarBackButtonHidden(true)
+                        .navigationBarHidden(true), isActive: $navigateToHome) {
                     EmptyView()
                 }
             )
