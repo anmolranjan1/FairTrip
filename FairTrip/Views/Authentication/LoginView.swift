@@ -64,6 +64,7 @@ struct LoginView: View {
 //            .navigationTitle("Login")
             .background(Color.backgroundColor) // Set the background color
         }
+        .navigationBarBackButtonHidden(true)
     }
 }
 

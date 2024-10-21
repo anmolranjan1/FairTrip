@@ -63,7 +63,9 @@ struct HomeView: View {
                 
                 HStack(spacing: 0) {
                     Text("Pickup Location: ")
-                        .font(.headline)
+                        .foregroundColor(Color(.white))
+                    
+                    Spacer()
                     
                     Text(locationManager.currentAddress ?? "Fetching location...")
                         .font(.subheadline)
