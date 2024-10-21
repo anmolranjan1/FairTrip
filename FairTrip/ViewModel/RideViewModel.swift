@@ -17,7 +17,7 @@ class RideViewModel: ObservableObject {
     @Published var fare: Double = 0.0
     @Published var timestamp: Date = Date()
     @Published var errorMessage: String?
-    @Published var availableDrivers: [Driver]? // Store available drivers
+    @Published var availableDrivers: [Driver] = [] // Store available drivers
 
     private var cancellables = Set<AnyCancellable>()
     private let rideService: RideService
@@ -136,6 +136,23 @@ class RideViewModel: ObservableObject {
             }, receiveValue: { drivers in
                 self.availableDrivers = drivers // Store fetched drivers
                 completion(drivers)
+            })
+            .store(in: &cancellables)
+    }
+    
+    // Function to fetch available drivers
+    func fetchAvailableDrivers() {
+        rideService.fetchAvailableDrivers()
+            .receive(on: DispatchQueue.main)
+            .sink(receiveCompletion: { completion in
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    self.errorMessage = error.localizedDescription
+                }
+            }, receiveValue: { drivers in
+                self.availableDrivers = drivers
             })
             .store(in: &cancellables)
     }

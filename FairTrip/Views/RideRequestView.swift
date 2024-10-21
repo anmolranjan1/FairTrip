@@ -18,36 +18,21 @@ struct RideRequestView: View {
                 .font(.title)
                 .padding()
 
-//            // Display available drivers
-//            if let drivers = viewModel.availableDrivers {
-//                List(drivers) { driver in
-//                    HStack {
-//                        VStack(alignment: .leading) {
-//                            Text("Driver: \(driver.name)")
-//                            Text("Vehicle: \(driver.vehicleModel.model)")
-//                            Text("Rating: \(driver.rating, specifier: "%.1f")")
-//                        }
-//                        Spacer()
-//                        Button(action: {
-//                            selectedDriver = driver
-//                            viewModel.selectedDriver = driver
-//                        }) {
-//                            Text(selectedDriver?.id == driver.id ? "Selected" : "Select")
-//                                .padding(10)
-//                                .background(selectedDriver?.id == driver.id ? Color.green : Color.blue)
-//                                .foregroundColor(.white)
-//                                .cornerRadius(8)
-//                        }
-//                    }
-//                }
-//            } else {
-//                Text("Loading drivers...")
-//                    .onAppear {
-//                        viewModel.loadAvailableDrivers { drivers in
-//                            viewModel.availableDrivers = drivers
-//                        }
-//                    }
-//            }
+            List(viewModel.availableDrivers) { driver in
+                VStack(alignment: .leading) {
+                    Text(driver.name)
+                        .font(.headline)
+                    Text(driver.vehicleModel)
+                        .font(.subheadline)
+                    Text(driver.licensePlate)
+                        .font(.subheadline)
+                    if let rating = driver.rating {
+                        Text("Rating: \(rating, specifier: "%.1f")")
+                            .font(.subheadline)
+                    }
+                }
+                .padding()
+            }
 
             // Show estimated fare
             HStack {
@@ -76,6 +61,9 @@ struct RideRequestView: View {
         }
         .padding()
         .navigationTitle("Ride Request")
+        .onAppear {
+            viewModel.fetchAvailableDrivers() // Fetch drivers when the view appears
+        }
     }
 }
 

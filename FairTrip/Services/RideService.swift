@@ -58,18 +58,22 @@ class RideService {
     }
     
     
-    // Simulated fetching available drivers
     func fetchAvailableDrivers() -> AnyPublisher<[Driver], Error> {
-        // Simulate network delay and return a mock list of drivers
-        let drivers = [
-            Driver(id: "1", name: "John Doe", vehicleModel: "Toyota Camry", licensePlate: "XYZ 1234", rating: 4.5, location: DriverLocation(latitude: 12.9716, longitude: 77.5946)),
-            Driver(id: "2", name: "Jane Smith", vehicleModel: "Honda Accord", licensePlate: "ABC 5678", rating: 4.8, location: DriverLocation(latitude: 12.2958, longitude: 76.6393))
-        ]
-        
-        return Just(drivers)
-            .delay(for: 1.0, scheduler: DispatchQueue.global())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+        return Future { promise in
+            self.db.collection("drivers").getDocuments { (snapshot, error) in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let documents = snapshot?.documents else {
+                    promise(.success([]))
+                    return
+                }
+                let drivers = documents.compactMap { try? $0.data(as: Driver.self) }
+                promise(.success(drivers))
+            }
+        }
+        .eraseToAnyPublisher()
     }
 
     // Simulated ride request to a backend
