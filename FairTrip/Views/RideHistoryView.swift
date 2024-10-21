@@ -6,39 +6,29 @@
 ////
 //
 import SwiftUI
-import Combine
 
 struct RideHistoryView: View {
-    @StateObject private var viewModel = RideHistoryViewModel()
-    
+    @ObservedObject var viewModel: RideHistoryViewModel
+    @State var userId: String // Assume userId is passed to this view
+
     var body: some View {
-        NavigationView {
-            List(viewModel.rideHistories) { ride in
-                NavigationLink(destination: RideDetailView(ride: ride)) {
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text("Pickup: \(ride.pickupLocation.latitude), \(ride.pickupLocation.longitude)")
-                            Text("Dropoff: \(ride.dropOffLocation.latitude), \(ride.dropOffLocation.longitude)")
-                            Text("Driver: \(ride.driver.name)")
-                            Text("Fare: ₹\(ride.fare, specifier: "%.2f")")
-                            Text("Status: \(ride.rideStatus.rawValue.capitalized)")
-                                .font(.subheadline)
-                                .foregroundColor(ride.rideStatus == .completed ? .green : .orange)
-                        }
-                        Spacer()
-                        Text(viewModel.dateFormatter.string(from: ride.timestamp))
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
-                }
-            }
-            .navigationTitle("Ride History")
-            .onAppear {
-                viewModel.fetchRideHistory(for: "user_id_example") // Replace with actual user ID
+        List(viewModel.rideHistories) { rideHistory in
+            VStack(alignment: .leading) {
+                Text("Pickup: \(rideHistory.pickupLocation.latitude), \(rideHistory.pickupLocation.longitude)")
+                Text("Dropoff: \(rideHistory.dropOffLocation.latitude), \(rideHistory.dropOffLocation.longitude)")
+                Text("Fare: \(rideHistory.fare)")
+                Text("Driver: \(rideHistory.driver.name)")
+                Text("Status: \(rideHistory.rideStatus.rawValue)")
+                Text("Timestamp: \(viewModel.dateFormatter.string(from: rideHistory.timestamp))")
             }
         }
+        .onAppear {
+            viewModel.refreshRideHistory(for: userId)
+        }
+        .navigationTitle("Ride History")
     }
 }
+
 
 struct RideDetailView: View {
     var ride: RideHistory

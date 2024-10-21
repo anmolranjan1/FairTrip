@@ -24,6 +24,11 @@ struct HomeView: View {
     @StateObject private var locationManager = LocationManager()
     @StateObject private var searchCompleter = LocationSearchCompleter()
     @State private var navigateToRideRequest = false
+    
+    // Assuming you have a userID available, either from authService or elsewhere
+    private var userId: String {
+        authService.user?.id ?? "unknown" // Replace with your actual logic
+    }
 
     var body: some View {
         NavigationView {
@@ -57,11 +62,6 @@ struct HomeView: View {
                 
                 Spacer().frame(height: 20)
 
-//                TextField("From Where to be Picked Up", text: $pickupLocation)
-//                .textFieldStyle(RoundedBorderTextFieldStyle())
-//                .padding(10)
-//                .background(Color.secondaryColor) // Use the custom secondary color
-                
                 HStack(spacing: 0) {
                     Text("Pickup Location: ")
                         .foregroundColor(Color(.white))
@@ -79,11 +79,6 @@ struct HomeView: View {
                 .padding(10)
                 .background(Color.secondaryColor)
 
-//                TextField("Where You Want to Go", text: $dropoffLocation)
-//                    .textFieldStyle(RoundedBorderTextFieldStyle())
-//                    .padding(10)
-//                    .background(Color.secondaryColor) // Use the custom secondary color
-                
                 // Dropoff Location with Suggestions
                 TextField("Where You Want to Go", text: $dropoffLocation, onEditingChanged: { isEditing in
                     if isEditing && !dropoffLocation.isEmpty {
@@ -123,8 +118,6 @@ struct HomeView: View {
                 Spacer()
 
                 Button(action: {
-                    // viewModel.pickupLocation = CLLocationCoordinate2D() // Set this based on user input
-                    // viewModel.dropoffLocation = CLLocationCoordinate2D() // Set this based on user input
                     if let currentLocation = locationManager.currentLocation {
                         viewModel.pickupLocation = currentLocation
                     }
@@ -152,7 +145,6 @@ struct HomeView: View {
                 Button(action: {
                     rideService.addDummyDriver()
                     rideService.addDummyRide()
-//                    rideService.addDummyRideHistory()
                 }) {
                     Text("Add Dummy Data")
                         .frame(maxWidth: .infinity)
@@ -163,25 +155,14 @@ struct HomeView: View {
                 }
                 .padding()
 
-//                NavigationLink(destination: RideHistoryView(viewModel: rideHistoryViewModel)) {
-//                    Text("Ride History")
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(Color.orange)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(10)
-//                }
-//                .padding()
-
                 Spacer().frame(height: 20)
             }
             .padding()
-//            .navigationTitle("Home")
             .sheet(isPresented: $showProfile) {
                 ProfileView() // Assuming you have a ProfileView to show
             }
             .sheet(isPresented: $showRideHistory) {
-                RideHistoryView()
+                RideHistoryView(viewModel: rideHistoryViewModel, userId: userId) // Pass the userId
             }
             .background(Color.backgroundColor)
         }

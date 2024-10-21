@@ -76,25 +76,57 @@ class RideService {
         .eraseToAnyPublisher()
     }
 
-    // Simulated ride request to a backend
-    func requestRide(ride: Ride) -> AnyPublisher<Bool, Error> {
-        // Simulate a network delay
-        return Just(true) // Simulating success
-            .delay(for: 1.0, scheduler: DispatchQueue.global())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+    func requestRide(ride: Ride, completion: @escaping (Bool) -> Void) {
+        do {
+            let _ = try db.collection("rides").addDocument(from: ride) { error in
+                if let error = error {
+                    print("Error adding ride: \(error)")
+                    completion(false)
+                } else {
+                    // Save to ride history
+                    let rideHistory = RideHistory(
+                        id: UUID().uuidString,
+                        pickupLocation: ride.pickupLocation,
+                        dropOffLocation: ride.dropoffLocation,
+                        timestamp: ride.timestamp,
+                        driver: Driver(id: ride.driverId, name: "Dummy Driver", vehicleModel: "Dummy Model", licensePlate: "Dummy Plate", rating: 4.5, location: DriverLocation(latitude: ride.pickupLocation.latitude, longitude: ride.pickupLocation.longitude)),
+                        fare: ride.fare,
+                        rideStatus: .ongoing // or .completed based on your logic
+                    )
+                    
+                    do {
+                        let _ = try self.db.collection("rideHistory").addDocument(from: rideHistory)
+                        print("Ride history added successfully!")
+                        completion(true)
+                    } catch {
+                        print("Error adding ride history: \(error)")
+                        completion(false)
+                    }
+                }
+            }
+        } catch {
+            print("Error adding ride: \(error)")
+            completion(false)
+        }
     }
 
-    // Simulated ride history fetch from a backend (Firebase or other)
+
     func fetchRideHistory(for userId: String) -> AnyPublisher<[RideHistory], Error> {
-        let rideHistories: [RideHistory] = [
-            RideHistory(id: "1", pickupLocation: CLLocationCoordinate2D(latitude: 12.9716, longitude: 77.5946), dropOffLocation: CLLocationCoordinate2D(latitude: 12.2958, longitude: 76.6393), timestamp: Date(), driver: Driver(id: "1", name: "John Doe", vehicleModel: "Toyota Camry", licensePlate: "XYZ 1234", rating: 4.5, location: DriverLocation(latitude: 12.9716, longitude: 77.5946)), fare: 150.0, rideStatus: .completed)
-        ]
-        
-        return Just(rideHistories)
-            .delay(for: 1.0, scheduler: DispatchQueue.global())
-            .setFailureType(to: Error.self)
-            .eraseToAnyPublisher()
+        return Future { promise in
+            self.db.collection("rideHistory").whereField("userId", isEqualTo: userId).getDocuments { (snapshot, error) in
+                if let error = error {
+                    promise(.failure(error))
+                    return
+                }
+                guard let documents = snapshot?.documents else {
+                    promise(.success([]))
+                    return
+                }
+                let rideHistories = documents.compactMap { try? $0.data(as: RideHistory.self) }
+                promise(.success(rideHistories))
+            }
+        }
+        .eraseToAnyPublisher()
     }
     
     func addRide(_ ride: Ride, completion: @escaping (Error?) -> Void) {

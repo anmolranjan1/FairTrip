@@ -22,16 +22,26 @@ class RideHistoryViewModel: ObservableObject {
         return formatter
     }()
     
+    // Function to fetch ride history for a specific user
     func fetchRideHistory(for userId: String) {
         rideService.fetchRideHistory(for: userId)
             .receive(on: DispatchQueue.main)
             .sink(receiveCompletion: { completion in
-                if case let .failure(error) = completion {
-                    print("Failed to fetch ride history: \(error)")
+                switch completion {
+                case .finished:
+                    break
+                case .failure(let error):
+                    print("Error fetching ride history: \(error.localizedDescription)")
                 }
-            }, receiveValue: { [weak self] rideHistories in
-                self?.rideHistories = rideHistories
+            }, receiveValue: { rideHistories in
+                self.rideHistories = rideHistories
             })
             .store(in: &cancellables)
     }
+    
+    // Call this function to refresh ride history whenever needed
+    func refreshRideHistory(for userId: String) {
+        fetchRideHistory(for: userId)
+    }
 }
+

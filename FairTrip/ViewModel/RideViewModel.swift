@@ -46,6 +46,7 @@ class RideViewModel: ObservableObject {
         fare = baseFare + (distance * perKmFare)
     }
 
+    // Inside RideViewModel class
     func requestRide() {
         guard let pickup = pickupLocation, let dropoff = dropoffLocation else {
             errorMessage = "Please set both pickup and dropoff locations."
@@ -53,30 +54,23 @@ class RideViewModel: ObservableObject {
         }
 
         let ride = Ride(id: UUID().uuidString,
-                        userId: authService.user?.id ?? "", // Make sure you are passing userId
+                        userId: authService.user?.id ?? "", // Ensure the correct user ID
                         pickupLocation: pickup,
                         dropoffLocation: dropoff,
                         timestamp: timestamp,
                         fare: fare,
-                        driverId: selectedDriver?.id ?? "") // Ensure the correct order and parameter names
+                        driverId: selectedDriver?.id ?? "")
 
-        rideService.requestRide(ride: ride)
-            .receive(on: DispatchQueue.main)
-            .sink(receiveCompletion: { completion in
-                switch completion {
-                case .finished:
-                    break
-                case .failure(let error):
-                    self.errorMessage = error.localizedDescription
-                }
-            }, receiveValue: { success in
-                if success {
-                    // Handle successful ride request
-                    self.rideHistory.append(ride)
-                }
-            })
-            .store(in: &cancellables)
+        rideService.requestRide(ride: ride) { success in
+            if success {
+                // Optionally fetch ride history after successful booking
+                self.fetchRideHistory()
+            } else {
+                self.errorMessage = "Failed to book ride."
+            }
+        }
     }
+
 
     // Fetch ride history for the logged-in user
     func fetchRideHistory() {
