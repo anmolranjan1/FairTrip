@@ -14,14 +14,15 @@ class SignUpViewModel: ObservableObject {
     @Published var password: String = ""
     @Published var confirmPassword: String = ""
     @Published var errorMessage: String?
+    @Published var isSignedUp: Bool = false // Add this property to track sign-up state
     
     private var cancellables = Set<AnyCancellable>()
     private let authService: AuthService
-    private var isSignedUp: Binding<Bool> // Add a Binding for isSignedUp
+    private var isSignedUpBinding: Binding<Bool> // Add a Binding for isSignedUp
     
     init(authService: AuthService, isSignedUp: Binding<Bool>) {
         self.authService = authService
-        self.isSignedUp = isSignedUp // Set the Binding
+        self.isSignedUpBinding = isSignedUp // Set the Binding
     }
     
     // Perform signup action
@@ -46,7 +47,8 @@ class SignUpViewModel: ObservableObject {
                     self.errorMessage = error.localizedDescription
                 }
             }, receiveValue: { user in
-                self.isSignedUp.wrappedValue = true // Update isSignedUp state
+                self.isSignedUp = true // Update isSignedUp state
+                self.isSignedUpBinding.wrappedValue = true // Update binding state
                 self.authService.user = user // Set the newly created user
             })
             .store(in: &cancellables)

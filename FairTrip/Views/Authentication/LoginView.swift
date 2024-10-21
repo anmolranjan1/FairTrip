@@ -28,11 +28,11 @@ struct LoginView: View {
                     .padding()
                     .autocapitalization(.none)
 
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                }
+//                if let errorMessage = viewModel.errorMessage {
+//                    Text(errorMessage)
+//                        .foregroundColor(.red)
+//                        .padding()
+//                }
                 
                 Spacer()
 

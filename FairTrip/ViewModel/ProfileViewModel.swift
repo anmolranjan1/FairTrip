@@ -8,8 +8,8 @@ import Foundation
 import Firebase
 import FirebaseFirestore
 import FirebaseStorage
-
 import SwiftUI
+import FirebaseAuth
 
 class ProfileViewModel: ObservableObject {
     @Published var user: User?
@@ -22,13 +22,18 @@ class ProfileViewModel: ObservableObject {
 
     // Fetch user profile
     func fetchProfile() {
-        guard let userId = user?.id else { return } // Replace with your actual user ID fetching logic
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("No user is currently logged in.")
+            return
+        }
+        
         db.collection("users").document(userId).getDocument { [weak self] document, error in
             if let document = document, document.exists {
-                self?.user = try? document.data(as: User.self) // Assuming you have a User model
+                self?.user = try? document.data(as: User.self)
                 self?.name = self?.user?.name ?? ""
                 self?.email = self?.user?.email ?? ""
                 self?.phone = self?.user?.phoneNumber ?? ""
+                print("Fetched user: \(String(describing: self?.user))") // Debugging statement
             } else {
                 print("User document does not exist: \(String(describing: error))")
             }
@@ -47,13 +52,13 @@ class ProfileViewModel: ObservableObject {
 
     // Update user profile
     func updateProfile() {
-        guard let userId = user?.id else { return } // Ensure userId is fetched correctly
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         updateProfile(userId: userId, name: name, phoneNumber: phone)
     }
 
     // Upload profile image
     func uploadProfileImage(_ image: UIImage) {
-        guard let userId = user?.id else { return }
+        guard let userId = Auth.auth().currentUser?.uid else { return }
         guard let imageData = image.jpegData(compressionQuality: 0.8) else { return }
         uploadProfilePicture(userId: userId, imageData: imageData)
     }

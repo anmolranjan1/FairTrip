@@ -61,7 +61,7 @@ struct HomeView: View {
 //                .padding(10)
 //                .background(Color.secondaryColor) // Use the custom secondary color
                 
-                HStack {
+                HStack(spacing: 0) {
                     Text("Pickup Location: ")
                         .font(.headline)
                     
@@ -73,7 +73,7 @@ struct HomeView: View {
                             locationManager.requestLocation()
                         }
                 }
-                .padding()
+                .padding(10)
                 .background(Color.secondaryColor)
 
 //                TextField("Where You Want to Go", text: $dropoffLocation)

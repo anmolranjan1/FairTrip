@@ -19,7 +19,7 @@ struct ProfileView: View {
                 HStack {
                     Text("Name:")
                     TextField("Enter your name", text: Binding(
-                        get: { viewModel.user?.name ?? "" },
+                        get: { viewModel.user?.name ?? "User" },
                         set: { viewModel.user?.name = $0 }
                     ))
                     .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -30,7 +30,7 @@ struct ProfileView: View {
                 HStack {
                     Text("Email:")
                     TextField("Enter your email", text: Binding(
-                        get: { viewModel.user?.email ?? "" },
+                        get: { viewModel.user?.email ?? "user@gmail.com" },
                         set: { viewModel.user?.email = $0 }
                     ))
                     .keyboardType(.emailAddress)
@@ -74,9 +74,7 @@ struct ProfileView: View {
                 }
 
                 Button(action: {
-                    if let user = viewModel.user {
-                        viewModel.updateProfile()
-                    }
+                    viewModel.updateProfile()
                 }) {
                     Text("Update Profile")
                         .frame(maxWidth: .infinity)
@@ -96,10 +94,8 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showingImagePicker) {
                 ImagePicker(image: $inputImage, onImagePicked: {
-                    if let image = inputImage, let user = viewModel.user {
-                        if let imageData = image.jpegData(compressionQuality: 0.8) {
-                            viewModel.uploadProfilePicture(userId: user.id, imageData: imageData)
-                        }
+                    if let image = inputImage {
+                        viewModel.uploadProfileImage(image)
                     }
                 })
             }

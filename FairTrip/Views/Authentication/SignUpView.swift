@@ -9,10 +9,12 @@ import SwiftUI
 
 struct SignUpView: View {
     @StateObject private var viewModel: SignUpViewModel // Declare it as a StateObject
+    @Binding var isSignedUp: Bool // Add a binding to observe the sign-up state
 
     // Initialize with AuthService and the binding
     init(isSignedUp: Binding<Bool>, authService: AuthService) {
         self._viewModel = StateObject(wrappedValue: SignUpViewModel(authService: authService, isSignedUp: isSignedUp))
+        self._isSignedUp = isSignedUp // Initialize the binding
     }
 
     var body: some View {
@@ -31,19 +33,18 @@ struct SignUpView: View {
                 TextField("Email", text: $viewModel.email)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-                    .background(Color.secondaryColor) // Updated to use custom secondary color
                     .autocapitalization(.none)
 
                 SecureField("Password", text: $viewModel.password)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-                    .background(Color.secondaryColor) // Updated to use custom secondary color
                     .autocapitalization(.none)
 
                 SecureField("Confirm Password", text: $viewModel.confirmPassword)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
 
+                // Error message display
                 if let errorMessage = viewModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
@@ -53,7 +54,7 @@ struct SignUpView: View {
                 Spacer()
 
                 Button(action: {
-                    viewModel.signUp() // Call the sign-up function
+                    viewModel.signUp()
                 }) {
                     Text("Sign Up")
                         .frame(maxWidth: .infinity)
@@ -73,8 +74,14 @@ struct SignUpView: View {
                 Spacer()
             }
             .padding()
-//            .navigationTitle("Sign Up")
             .background(Color.backgroundColor) // Set the background color
+            .onChange(of: viewModel.isSignedUp) { newValue in
+                if newValue {
+                    // Redirect to HomeView after successful sign-up
+                    isSignedUp = true
+                }
+            }
+            .navigationTitle("Sign Up")
         }
     }
 }
@@ -84,7 +91,6 @@ struct SignUpView_Previews: PreviewProvider {
     @State static var isSignedUp = false
 
     static var previews: some View {
-        // Provide a mock AuthService instance
         SignUpView(isSignedUp: $isSignedUp, authService: AuthService())
             .preferredColorScheme(.light) // Preview in light mode
         SignUpView(isSignedUp: $isSignedUp, authService: AuthService())
