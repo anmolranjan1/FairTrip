@@ -1,9 +1,3 @@
-// HomeView.swift
-// FairTrip
-//
-// Created by Anmol Ranjan on 20/10/24.
-//
-
 import SwiftUI
 import CoreLocation
 import MapKit
@@ -13,7 +7,6 @@ struct HomeView: View {
     private let authService = AuthService()
     
     @StateObject private var viewModel = RideViewModel(rideService: RideService(), authService: AuthService())
-//    @StateObject private var rideHistoryViewModel = RideHistoryViewModel()
     @State private var showRideHistory = false
     @State private var showProfile = false
     @State private var pickupLocation: String = ""
@@ -36,23 +29,25 @@ struct HomeView: View {
                     Text("Request a Ride")
                         .font(.title)
                         .padding()
-                        .foregroundColor(.textColor) // Use the custom text color
+                        .foregroundColor(.textColor)
                     
                     Spacer()
                     
-                    Menu {
-                        Button(action: {
-                            showProfile.toggle()
-                        }) {
-                            Text("Profile")
-                        }
-                        Button(action: {
-                            showRideHistory.toggle()
-                        }) {
-                            Text("Ride History")
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle") // Icon for the menu
+                    // Profile Button
+                    Button(action: {
+                        showProfile.toggle()
+                    }) {
+                        Image(systemName: "person.circle") // Icon for Profile
+                            .font(.title)
+                            .foregroundColor(.textColor)
+                            .padding()
+                    }
+                    
+                    // Ride History Button
+                    Button(action: {
+                        showRideHistory.toggle()
+                    }) {
+                        Image(systemName: "clock.fill") // Icon for Ride History
                             .font(.title)
                             .foregroundColor(.textColor)
                             .padding()
