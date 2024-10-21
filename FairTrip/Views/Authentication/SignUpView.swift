@@ -43,13 +43,6 @@ struct SignUpView: View {
                 SecureField("Confirm Password", text: $viewModel.confirmPassword)
                     .textFieldStyle(RoundedBorderTextFieldStyle())
                     .padding()
-
-                // Error message display
-                if let errorMessage = viewModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
-                        .padding()
-                }
                 
                 Spacer()
 
