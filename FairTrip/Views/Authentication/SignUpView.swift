@@ -1,4 +1,3 @@
-//
 //  SignUpView.swift
 //  FairTrip
 //
@@ -10,6 +9,7 @@ import SwiftUI
 struct SignUpView: View {
     @StateObject private var viewModel: SignUpViewModel // Declare it as a StateObject
     @Binding var isSignedUp: Bool // Add a binding to observe the sign-up state
+    @State private var navigateToHome: Bool = false // State for navigation
 
     // Initialize with AuthService and the binding
     init(isSignedUp: Binding<Bool>, authService: AuthService) {
@@ -70,11 +70,16 @@ struct SignUpView: View {
             .background(Color.backgroundColor) // Set the background color
             .onChange(of: viewModel.isSignedUp) { newValue in
                 if newValue {
-                    // Redirect to HomeView after successful sign-up
-                    isSignedUp = true
+                    navigateToHome = true // Trigger navigation
                 }
             }
             .navigationTitle("Sign Up")
+            .background(
+                // NavigationLink for redirection
+                NavigationLink(destination: HomeView(), isActive: $navigateToHome) {
+                    EmptyView()
+                }
+            )
         }
     }
 }
