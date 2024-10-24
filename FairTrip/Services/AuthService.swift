@@ -40,7 +40,7 @@ class AuthService: ObservableObject {
                     let newUser = User(id: firebaseUser.uid, name: name, email: firebaseUser.email ?? "", phoneNumber: phone)
                     
                     // Store the user's data in Firestore, including phone number
-                    self.db.collection("users").document(newUser.id).setData([
+                    self.db.collection("users").document(newUser.id!).setData([
                         "name": newUser.name,
                         "email": newUser.email,
                         "phoneNumber": newUser.phoneNumber, // Store the phone number here

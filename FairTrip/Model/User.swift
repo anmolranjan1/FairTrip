@@ -6,9 +6,10 @@
 //
 
 import Foundation
+import FirebaseFirestore
 
 struct User: Identifiable, Codable {
-    var id: String
+    @DocumentID var id: String?
     var name: String
     var email: String
     var phoneNumber: String
